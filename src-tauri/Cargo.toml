@@ -24,6 +24,9 @@ base64 = "0.22"
 sysinfo = { version = "0.30", default-features = false }
 tiny_http = "0.12"
 aes-gcm = "0.10"
+# the WebView2 interfaces wry is built on, for files dropped on the page
+webview2-com = "0.39"
+windows62 = { package = "windows", version = "0.62", features = ["Win32_System_Com"] }
 
 [dependencies.windows]
 version = "0.58"
@@ -35,6 +38,7 @@ features = [
   "Win32_Storage_FileSystem",
   "Win32_System_DataExchange",
   "Win32_System_Memory",
+  "Win32_UI_Input_KeyboardAndMouse",
   "Win32_UI_Shell",
   "Win32_UI_WindowsAndMessaging",
 ]

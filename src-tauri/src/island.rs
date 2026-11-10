@@ -57,6 +57,10 @@ pub fn place(app: &AppHandle) {
 pub fn watch_cursor(app: AppHandle) {
     std::thread::spawn(move || {
         let mut inside = false;
+        #[cfg(debug_assertions)]
+        if std::env::var("OSTROV_NO_CLICKTHROUGH").is_ok() {
+            return;
+        }
         let _ = window(&app).map(|w| w.set_ignore_cursor_events(true));
         loop {
             std::thread::sleep(Duration::from_millis(50));
@@ -65,13 +69,21 @@ pub fn watch_cursor(app: AppHandle) {
                 continue;
             }
             let (Ok(pos), Ok(size), Ok(scale)) = (w.outer_position(), w.outer_size(), w.scale_factor()) else { continue };
-            let (rw, rh) = *app.state::<App>().island_rect.lock().unwrap();
+            let (mut rw, mut rh) = *app.state::<App>().island_rect.lock().unwrap();
+            // something is being dragged: catch it over the whole compact island,
+            // even while the island is folded to a thin strip
+            if win::mouse_down() {
+                rw = rw.max(240.0);
+                rh = rh.max(40.0);
+            }
             let (cx, cy) = win::cursor();
             let center = pos.x as f64 + size.width as f64 / 2.0;
             let now = ((cx as f64) - center).abs() <= rw * scale / 2.0 + 2.0
                 && cy >= pos.y && (cy as f64) <= pos.y as f64 + rh * scale + 2.0;
             if now != inside {
                 inside = now;
+                #[cfg(debug_assertions)]
+                eprintln!("[cursor] inside={inside} at {cx},{cy} rect {rw}x{rh}");
                 let _ = w.set_ignore_cursor_events(!inside);
             }
         }
@@ -98,7 +110,13 @@ pub fn watch_under(app: AppHandle) {
             let top = m.position().y;
             // the compact island with its ears: 208×36 plus 16 each side
             let (aw, ah) = ((240.0 * scale) as i32, (36.0 * scale) as i32);
-            let want = win::app_window_at(cx, top + (8.0 * scale) as i32, own) && win::area_busy(cx - aw / 2, top, aw, ah);
+            let app_under = win::app_window_at(cx, top + (8.0 * scale) as i32, own);
+            let busy = app_under && win::area_busy(cx - aw / 2, top, aw, ah);
+            #[cfg(debug_assertions)]
+            if std::env::var("OSTROV_TRACE_SLIM").is_ok() {
+                eprintln!("[under] app={app_under} busy={busy}");
+            }
+            let want = busy;
             let state = app.state::<App>();
             let now = *state.slim.lock().unwrap();
             votes = if want != now { votes + 1 } else { 0 };

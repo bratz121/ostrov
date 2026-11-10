@@ -3,6 +3,7 @@
 mod agents;
 mod bridge;
 mod clip;
+mod drop;
 mod island;
 mod store;
 mod win;
@@ -15,7 +16,7 @@ use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::TrayIconBuilder;
-use tauri::{AppHandle, DragDropEvent, Emitter, Manager, State, WindowEvent};
+use tauri::{AppHandle, Emitter, Manager, State};
 use tauri_plugin_autostart::ManagerExt as _;
 use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
 use tauri_plugin_notification::NotificationExt;
@@ -390,22 +391,7 @@ fn main() {
             *handle.state::<App>().agents.lock().unwrap() = Some(watcher);
 
             let w = island::window(&handle).expect("island window");
-            let h = handle.clone();
-            w.on_window_event(move |e| {
-                if let WindowEvent::DragDrop(d) = e {
-                    let (kind, paths) = match d {
-                        DragDropEvent::Enter { paths, .. } => ("enter", paths.clone()),
-                        DragDropEvent::Over { .. } => return,
-                        DragDropEvent::Drop { paths, .. } => ("drop", paths.clone()),
-                        _ => ("leave", vec![]),
-                    };
-                    let paths: Vec<String> = paths.iter().map(|p| p.to_string_lossy().to_string()).collect();
-                    if kind == "drop" {
-                        add_to_shelf(&h, &paths);
-                    }
-                    let _ = h.emit("filedrag", json!({ "type": kind, "count": paths.len() }));
-                }
-            });
+            drop::install(&w, handle.clone());
             island::place(&handle);
             let _ = w.show();
 

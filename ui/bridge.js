@@ -213,7 +213,11 @@
     setDisplay: (id) => fire('set_config', { patch: { display: id } }),
     focusWindow: () => fire('win_focus'),
     blurWindow: () => fire('win_blur'),
-    shelfAdd: () => {}, // files dropped on the window are added by Rust directly
+    // WebView2 hands the dropped File objects to Rust, which reads their paths
+    shelfAdd: (files) => {
+      const wv = window.chrome && window.chrome.webview;
+      if (files && files.length && wv && wv.postMessageWithAdditionalObjects) wv.postMessageWithAdditionalObjects('ostrov:files', files);
+    },
     shelfRemove: (id) => fire('shelf_remove', { id }),
     shelfClear: () => fire('shelf_clear'),
     shelfOpen: (id) => fire('shelf_open', { id }),

@@ -29,6 +29,11 @@ pub fn cursor() -> (i32, i32) {
     (p.x, p.y)
 }
 
+/// The left mouse button is held: a drag (of a file, say) may be under way.
+pub fn mouse_down() -> bool {
+    unsafe { windows::Win32::UI::Input::KeyboardAndMouse::GetAsyncKeyState(0x01) as u16 & 0x8000 != 0 }
+}
+
 pub fn foreground() -> isize {
     unsafe { GetForegroundWindow().0 as isize }
 }
