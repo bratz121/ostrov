@@ -1,0 +1,70 @@
+{
+  "name": "ostrov",
+  "productName": "Ostrov",
+  "version": "1.0.0",
+  "description": "Остров — Dynamic Island для Windows: музыка, календарь, сообщения, буфер обмена, таймер",
+  "author": "Ostrov",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "icon": "electron build/render-icon.js",
+    "dist": "powershell -NoProfile -ExecutionPolicy Bypass -File build/dist.ps1",
+    "dist:tauri": "powershell -NoProfile -ExecutionPolicy Bypass -File build/dist-tauri.ps1"
+  },
+  "dependencies": {
+    "@fontsource-variable/onest": "^5.1.0",
+    "ical.js": "^2.2.1",
+    "node-ical": "^0.20.1"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.12.4",
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "ru.ostrov.island",
+    "productName": "Ostrov",
+    "electronDist": "node_modules/electron/dist",
+    "electronVersion": "33.4.11",
+    "copyright": "Остров",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "calendar.js",
+      "agents.js",
+      "media.ps1",
+      "notify.ps1",
+      "ui/**",
+      "assets/**",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "*.ps1"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.png",
+      "artifactName": "Ostrov-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Остров",
+      "uninstallDisplayName": "Остров",
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false,
+      "installerLanguages": [
+        "ru_RU"
+      ],
+      "language": "1049"
+    }
+  }
+}

@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; connect-src 'self' ipc: http://ipc.localhost">
+  <title>Остров</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <svg width="0" height="0" hidden>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V19a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19v-8.5Z" /><path d="M9.5 20.5v-6h5v6" /></symbol>
+    <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l11-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="17" cy="16" r="3" /></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20.5 11.5a7.5 7.5 0 0 1-10.9 6.7L4 20l1.6-4.9A7.5 7.5 0 1 1 20.5 11.5Z" /></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16.5" rx="4" /><path d="M3 10h18M8 2.5v4M16 2.5v4" /></symbol>
+    <symbol id="i-shelf" viewBox="0 0 24 24"><path d="M3.5 13.5 6 5.5A1.5 1.5 0 0 1 7.4 4.5h9.2A1.5 1.5 0 0 1 18 5.5l2.5 8v4.5a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 18v-4.5Z" /><path d="M3.5 13.5h4.5l1.2 2.5h5.6l1.2-2.5h4.5" /></symbol>
+    <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="3.5" /><path d="M9 4a3 3 0 0 1 6 0M9 11h6M9 15.5h4" /></symbol>
+    <symbol id="i-tasks" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" /><path d="m8.5 12.3 2.4 2.4 4.8-5" /></symbol>
+    <symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="13.5" r="7.5" /><path d="M12 9.5v4l2.5 2M9.5 2.5h5" /></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M9 3h6l-1 6 3.5 4h-11L10 9 9 3ZM12 13v8" /></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" /><path d="M12 2.5l1.6 2.6 3-.6.9 2.9 2.8 1.2-1 2.9 1 2.9-2.8 1.2-.9 2.9-3-.6L12 21.5l-1.6-2.6-3 .6-.9-2.9-2.8-1.2 1-2.9-1-2.9 2.8-1.2.9-2.9 3 .6L12 2.5Z" /></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4.5 4.5" /></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6.5 6.5 11 11M17.5 6.5l-11 11" /></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5" /></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M4 9.5h3l4.5-4v13l-4.5-4H4v-5Z" /><path d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a7.8 7.8 0 0 1 0 11" /></symbol>
+    <symbol id="i-mute" viewBox="0 0 24 24"><path d="M4 9.5h3l4.5-4v13l-4.5-4H4v-5Z" /><path d="m15.5 9.5 5 5M20.5 9.5l-5 5" /></symbol>
+    <symbol id="i-battery" viewBox="0 0 24 24"><rect x="2.5" y="7.5" width="16.5" height="9" rx="2.5" /><path d="M21.5 10.5v3" /></symbol>
+    <symbol id="i-prev" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M6 5.5a1 1 0 0 1 2 0v13a1 1 0 0 1-2 0v-13ZM19 6.6v10.8a1 1 0 0 1-1.55.83l-7.9-5.4a1 1 0 0 1 0-1.66l7.9-5.4A1 1 0 0 1 19 6.6Z" /></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M18 5.5a1 1 0 0 0-2 0v13a1 1 0 0 0 2 0v-13ZM5 6.6v10.8a1 1 0 0 0 1.55.83l7.9-5.4a1 1 0 0 0 0-1.66l-7.9-5.4A1 1 0 0 0 5 6.6Z" /></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M8 5.3v13.4a1.2 1.2 0 0 0 1.84 1.01l10.4-6.7a1.2 1.2 0 0 0 0-2.02l-10.4-6.7A1.2 1.2 0 0 0 8 5.3Z" /></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M6.5 5.5A1.5 1.5 0 0 1 8 4h1.5A1.5 1.5 0 0 1 11 5.5v13A1.5 1.5 0 0 1 9.5 20H8a1.5 1.5 0 0 1-1.5-1.5v-13ZM13 5.5A1.5 1.5 0 0 1 14.5 4H16a1.5 1.5 0 0 1 1.5 1.5v13A1.5 1.5 0 0 1 16 20h-1.5a1.5 1.5 0 0 1-1.5-1.5v-13Z" /></symbol>
+    <symbol id="w-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3 7 7M17 17l1.7 1.7M18.7 5.3 17 7M7 17l-1.7 1.7" /></symbol>
+    <symbol id="w-partly" viewBox="0 0 24 24"><path d="M9 3v1.5M3 9h1.5M4.8 4.8l1 1M13.2 4.8l-1 1M6.2 11.6A3.5 3.5 0 1 1 12.3 8" /><path d="M9 20h8.5a3.5 3.5 0 0 0 .4-7 5 5 0 0 0-9.6 1.3A3 3 0 0 0 9 20Z" /></symbol>
+    <symbol id="w-cloud" viewBox="0 0 24 24"><path d="M7 19h10.5a4 4 0 0 0 .5-8A6 6 0 0 0 6.4 12.4 3.4 3.4 0 0 0 7 19Z" /></symbol>
+    <symbol id="w-rain" viewBox="0 0 24 24"><path d="M7 15.5h10.5a4 4 0 0 0 .5-8A6 6 0 0 0 6.4 8.9 3.4 3.4 0 0 0 7 15.5Z" /><path d="M8.5 18.5 7.5 21M12.5 18.5l-1 2.5M16.5 18.5l-1 2.5" /></symbol>
+    <symbol id="w-snow" viewBox="0 0 24 24"><path d="M7 15.5h10.5a4 4 0 0 0 .5-8A6 6 0 0 0 6.4 8.9 3.4 3.4 0 0 0 7 15.5Z" /><path d="M8 19.5h.01M12 19.5h.01M16 19.5h.01M10 21.5h.01M14 21.5h.01" /></symbol>
+    <symbol id="w-storm" viewBox="0 0 24 24"><path d="M7 15.5h10.5a4 4 0 0 0 .5-8A6 6 0 0 0 6.4 8.9 3.4 3.4 0 0 0 7 15.5Z" /><path d="m12.5 16-2 3h3l-2 3" /></symbol>
+    <symbol id="w-fog" viewBox="0 0 24 24"><path d="M7 13.5h10.5a4 4 0 0 0 .5-8A6 6 0 0 0 6.4 6.9 3.4 3.4 0 0 0 7 13.5Z" /><path d="M5 17h14M7.5 20.5h9" /></symbol>
+  </svg>
+
+  <div id="island" data-state="compact">
+    <div class="clip">
+      <div class="compact" aria-hidden="true">
+        <span class="c-left">
+          <img class="c-art" id="cArt" alt="" hidden>
+          <span class="c-clock" id="cClock"></span>
+        </span>
+        <span class="c-peek" id="cPeek"></span>
+        <span class="c-right">
+          <span class="c-msgs" id="cMsgs" hidden><svg><use href="#i-chat" /></svg><b id="cMsgsCount"></b></span>
+          <span class="agent-dot" id="cAgent" hidden></span>
+          <span class="c-timer" id="cTimer" hidden></span>
+          <span class="eq" id="cEq" hidden><i></i><i></i><i></i><i></i></span>
+          <span class="c-date" id="cDate"></span>
+        </span>
+      </div>
+
+      <div class="panel">
+        <header class="bar">
+          <nav class="tabs" aria-label="Разделы">
+            <button class="tab" data-view="home" aria-label="Обзор" title="Обзор"><svg><use href="#i-home" /></svg></button>
+            <button class="tab" data-view="messages" id="msgsTab" aria-label="Сообщения" title="Сообщения"><svg><use href="#i-chat" /></svg><span class="badge" id="msgsBadge" hidden></span></button>
+            <button class="tab" data-view="calendar" aria-label="Календарь" title="Календарь"><svg><use href="#i-calendar" /></svg></button>
+            <button class="tab" data-view="shelf" aria-label="Полка для файлов" title="Полка для файлов"><svg><use href="#i-shelf" /></svg></button>
+            <button class="tab" data-view="clipboard" aria-label="Буфер обмена" title="Буфер обмена"><svg><use href="#i-clipboard" /></svg></button>
+            <button class="tab" data-view="tasks" aria-label="Задачи" title="Задачи"><svg><use href="#i-tasks" /></svg></button>
+            <button class="tab" data-view="timer" aria-label="Таймер" title="Таймер"><svg><use href="#i-timer" /></svg></button>
+          </nav>
+
+          <div class="bar-mid">
+            <label class="field" id="search" hidden>
+              <svg><use href="#i-search" /></svg>
+              <input id="searchInput" type="search" placeholder="Найти в истории" aria-label="Найти в истории буфера">
+            </label>
+            <form class="field" id="taskForm" hidden>
+              <svg><use href="#i-plus" /></svg>
+              <input id="taskInput" type="text" maxlength="200" placeholder="Новая задача, Enter — добавить" aria-label="Новая задача">
+            </form>
+            <div class="status" id="status"></div>
+          </div>
+
+          <span class="sys" id="sys" title="Загрузка процессора, памяти и заряд"></span>
+          <button class="round" id="clearBtn" hidden></button>
+          <button class="round icon" id="pin" aria-pressed="false" aria-label="Закрепить открытым" title="Закрепить открытым (Ctrl+Alt+Пробел)"><svg><use href="#i-pin" /></svg></button>
+          <button class="round icon tab" data-view="settings" aria-label="Настройки" title="Настройки"><svg><use href="#i-gear" /></svg></button>
+        </header>
+
+        <main class="views">
+          <section class="view" data-view="home">
+            <div class="card now" id="now">
+              <div class="art" id="artBox"><img id="art" alt="" hidden><svg><use href="#i-music" /></svg></div>
+              <div class="track">
+                <h1 id="title"></h1>
+                <p id="artist"></p>
+                <div class="progress" id="progress" hidden>
+                  <span id="pos"></span><div class="rail"><div class="fill" id="fill"></div></div><span id="dur"></span>
+                </div>
+                <div class="controls">
+                  <button class="ctl" data-cmd="prev" aria-label="Предыдущий трек"><svg><use href="#i-prev" /></svg></button>
+                  <button class="ctl main" data-cmd="toggle" id="toggle" aria-label="Играть">
+                    <svg class="ico-play"><use href="#i-play" /></svg><svg class="ico-pause"><use href="#i-pause" /></svg>
+                  </button>
+                  <button class="ctl" data-cmd="next" aria-label="Следующий трек"><svg><use href="#i-next" /></svg></button>
+                  <div class="volume">
+                    <button class="ctl small" id="mute" aria-label="Выключить звук"><svg><use id="muteIcon" href="#i-volume" /></svg></button>
+                    <input id="volume" type="range" min="0" max="100" step="1" aria-label="Громкость">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <aside class="card side" id="nextCard"></aside>
+            <aside class="card side" id="weatherCard"></aside>
+          </section>
+
+          <section class="view stack" data-view="calendar" hidden>
+            <div class="card day" id="dayline" hidden></div>
+            <div class="row" id="events"></div>
+          </section>
+
+          <section class="view" data-view="messages" hidden><div class="row" id="msgs"></div></section>
+          <section class="view" data-view="shelf" hidden><div class="row" id="shelf"></div></section>
+          <section class="view" data-view="clipboard" hidden>
+            <div class="filters" id="clipFilters" role="radiogroup" aria-label="Что показывать">
+              <button role="radio" data-kind="all"><span>Всё</span><b></b></button>
+              <button role="radio" data-kind="link"><span>Ссылки</span><b></b></button>
+              <button role="radio" data-kind="text"><span>Текст</span><b></b></button>
+              <button role="radio" data-kind="image"><span>Скрины</span><b></b></button>
+            </div>
+            <div class="row" id="clips"></div>
+          </section>
+          <section class="view" data-view="tasks" hidden><div class="card tasks" id="tasks"></div></section>
+
+          <section class="view" data-view="timer" hidden>
+            <div class="card timer">
+              <div class="digits" id="digits">25:00</div>
+              <div class="rail"><div class="fill" id="timerFill"></div></div>
+            </div>
+            <div class="card timer-side">
+              <div class="chips" id="presets">
+                <button class="chip" data-min="5">5 мин</button>
+                <button class="chip" data-min="15">15 мин</button>
+                <button class="chip" data-min="25">25 мин</button>
+                <button class="chip" data-min="45">45 мин</button>
+                <button class="chip" data-min="60">1 час</button>
+              </div>
+              <div class="actions">
+                <button class="btn primary" id="timerStart">Запустить</button>
+                <button class="btn" id="timerReset">Сбросить</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="view settings" data-view="settings" hidden>
+            <form class="card set cal" id="calForm">
+              <h2>Яндекс Календарь</h2>
+              <div id="calConnected" hidden>
+                <p class="hint" id="calAccount"></p>
+                <div class="actions"><button type="button" class="btn" id="calRefresh">Обновить</button><button type="button" class="btn" id="calDisconnect">Отключить</button></div>
+              </div>
+              <div id="calFields">
+                <p class="hint">Шестерёнка у календаря → Экспорт → ссылка iCal. Пароль не нужен.</p>
+                <input id="calLink" type="url" placeholder="Ссылка iCal" aria-label="Ссылка экспорта календаря" autocomplete="off" spellcheck="false" required>
+                <div class="actions">
+                  <button class="btn primary" id="calSubmit">Подключить</button>
+                  <button type="button" class="link" id="calHelp">Где это</button>
+                </div>
+              </div>
+              <p class="msg" id="calMsg" role="status"></p>
+            </form>
+            <div class="card set">
+              <div class="group">
+                <h2 id="agentLabel">Статус агента</h2>
+                <div class="seg" id="agentSeg" role="radiogroup" aria-labelledby="agentLabel">
+                  <button role="radio" data-agent="off">Выкл</button>
+                  <button role="radio" data-agent="claude">Claude</button>
+                  <button role="radio" data-agent="cursor">Cursor</button>
+                  <button role="radio" data-agent="codex">Codex</button>
+                </div>
+                <p class="hint" id="agentHint"></p>
+              </div>
+              <div class="row-setting">
+                <h2 id="notifyLabel">Сообщения</h2>
+                <div class="seg" id="notifySeg" role="radiogroup" aria-labelledby="notifyLabel">
+                  <button type="button" role="radio" data-from="yandex" title="Яндекс Мессенджер и другие уведомления Яндекса">Яндекс</button>
+                  <button type="button" role="radio" data-from="all" title="Уведомления всех приложений">Все</button>
+                </div>
+              </div>
+            </div>
+            <form class="card set" id="cityForm">
+              <div class="group">
+                <h2>Остров</h2>
+                <p class="msg" id="cityMsg" role="status"></p>
+                <div id="cityPick">
+                  <div class="inline">
+                    <input id="city" type="text" maxlength="80" placeholder="Город для погоды" aria-label="Город для погоды" autocomplete="off" required>
+                    <button class="btn" id="citySubmit">Сохранить</button>
+                  </div>
+                </div>
+              </div>
+              <div class="row-setting">
+                <h2 id="displayLabel">Экран</h2>
+                <div class="seg wide" id="displaySeg" role="radiogroup" aria-labelledby="displayLabel"></div>
+              </div>
+              <div class="actions spread">
+                <label class="check"><input type="checkbox" id="autostart"> Запуск с Windows</label>
+                <button type="button" class="btn" id="quit">Выйти</button>
+              </div>
+            </form>
+          </section>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <script src="bridge.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
