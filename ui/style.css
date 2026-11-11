@@ -254,6 +254,18 @@ input[type='range']::-webkit-slider-thumb { appearance: none; width: 12px; heigh
 .side .foot + .btn.join { margin-top: 8px; }
 .side .foot:has(+ .btn.join) { margin-top: auto; }
 .btn.small { height: 28px; padding: 0 12px; border-radius: 14px; font-size: var(--fs-caption); }
+.btn.wide { align-self: stretch; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn.wide svg { width: 18px; height: 18px; stroke-width: 1.8; }
+
+/* ---------- VPN tab ---------- */
+.vpn-main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 6px; }
+.vpn-hero { width: 64px; height: 64px; border-radius: 20px; background: var(--raised); display: grid; place-items: center; margin-bottom: 6px; }
+.vpn-hero svg { width: 32px; height: 32px; stroke-width: 1.6; color: var(--text); }
+.vpn-main h1 { font-size: var(--fs-title); font-weight: 600; }
+.vpn-main .note { color: var(--muted); max-width: 320px; }
+.vpn-main .btn.wide { align-self: center; min-width: 200px; margin-top: 10px; }
+.vpn-info { width: 220px; flex: none; display: flex; flex-direction: column; }
+.vpn-info .note { color: var(--muted); margin-top: 4px; }
 div.foot .btn.small { margin-inline-start: auto; }
 .side form { margin-top: auto; display: flex; flex-direction: column; gap: 6px; }
 .side form .btn { margin: 0; }

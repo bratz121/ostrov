@@ -115,6 +115,7 @@ fn init(app: AppHandle, s: State<App>) -> Value {
         "clips": *s.clips.lock().unwrap(), "shelf": *s.shelf.lock().unwrap(), "msgs": *s.msgs.lock().unwrap(),
         "notifyAccess": *s.notify_access.lock().unwrap(), "slim": *s.slim.lock().unwrap(), "tasks": cfg["tasks"], "displays": island::list_displays(&app),
         "agent": s.agents.lock().unwrap().as_ref().map(|a| a.get()).unwrap_or(json!({})),
+        "vpn": { "present": vpn_present(), "hasBackup": vpn_backup_file(&app).map(|p| p.exists()).unwrap_or(false) },
         "settings": {
             "agent": cfg["agent"], "notifyFrom": cfg["notifyFrom"], "autostart": autostart,
             "city": cfg["city"]["name"], "cityObj": cfg["city"], "cursorHooks": agents::cursor_hooks(),
@@ -290,6 +291,71 @@ fn open_url(app: AppHandle, url: String) {
     if url.starts_with("https://") { let _ = app.opener().open_url(url, None::<&str>); }
 }
 
+/// The paths FortiClient installs to, newest layout first.
+const FORTICLIENT_PATHS: [&str; 2] = [
+    r"C:\Program Files\Fortinet\FortiClient\FortiClient.exe",
+    r"C:\Program Files (x86)\Fortinet\FortiClient\FortiClient.exe",
+];
+
+/// Launch FortiClient if it's installed. Returns false if the exe isn't found,
+/// so the page can tell the user instead of failing silently.
+#[tauri::command]
+fn launch_forticlient() -> bool {
+    let path = FORTICLIENT_PATHS.iter().find(|p| std::path::Path::new(p).exists());
+    match path {
+        Some(p) => std::process::Command::new(p).spawn().is_ok(),
+        None => false,
+    }
+}
+
+// ---------- FortiClient VPN profile, kept across updates ----------
+// FortiClient keeps its SSL-VPN tunnels (server, port, user, saved options) under
+// this per-user key; an update can wipe it. We copy the whole branch to a file
+// as-is via reg.exe and never read or decode what's inside it, so the saved
+// profile can be put back without re-entering anything.
+const VPN_TUNNELS_KEY: &str = r"HKCU\Software\Fortinet\FortiClient\Sslvpn\Tunnels";
+
+fn vpn_backup_file(app: &AppHandle) -> Option<std::path::PathBuf> {
+    let dir = app.path().app_data_dir().ok()?;
+    std::fs::create_dir_all(&dir).ok()?;
+    Some(dir.join("vpn-profile.reg"))
+}
+
+/// Run reg.exe without flashing a console window.
+fn reg(args: &[&str]) -> std::io::Result<std::process::Output> {
+    use std::os::windows::process::CommandExt;
+    const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+    std::process::Command::new("reg").args(args).creation_flags(CREATE_NO_WINDOW).output()
+}
+
+/// True when FortiClient has at least one saved tunnel. Lists only the tunnel
+/// names under the key, never the values stored inside them.
+fn vpn_present() -> bool {
+    reg(&["query", VPN_TUNNELS_KEY])
+        .map(|o| o.status.success() && String::from_utf8_lossy(&o.stdout).contains(r"\Tunnels\"))
+        .unwrap_or(false)
+}
+
+/// Save the current profile branch to the backup file, if there is one to save.
+fn vpn_backup_now(app: &AppHandle) -> bool {
+    let Some(path) = vpn_backup_file(app) else { return false };
+    vpn_present() && reg(&["export", VPN_TUNNELS_KEY, &path.to_string_lossy(), "/y"]).map(|o| o.status.success()).unwrap_or(false)
+}
+
+#[tauri::command]
+fn vpn_status(app: AppHandle) -> Value {
+    json!({ "present": vpn_present(), "hasBackup": vpn_backup_file(&app).map(|p| p.exists()).unwrap_or(false) })
+}
+
+#[tauri::command]
+fn vpn_save(app: AppHandle) -> bool { vpn_backup_now(&app) }
+
+#[tauri::command]
+fn vpn_restore(app: AppHandle) -> bool {
+    let Some(path) = vpn_backup_file(&app) else { return false };
+    path.exists() && reg(&["import", &path.to_string_lossy()]).map(|o| o.status.success()).unwrap_or(false)
+}
+
 #[tauri::command]
 fn quit(app: AppHandle) { app.exit(0); }
 
@@ -353,7 +419,8 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             init, rect, media_cmd, set_volume, toggle_mute, http_get, get_secret, set_secret, set_config,
             clip_copy, clip_clear, clip_pin, clip_remove, shelf_add, shelf_remove, shelf_clear, shelf_open, shelf_reveal,
-            msgs_clear, set_autostart, copy_text, show_notification, open_url, quit, win_focus, win_blur, log
+            msgs_clear, set_autostart, copy_text, show_notification, open_url, launch_forticlient,
+            vpn_status, vpn_save, vpn_restore, quit, win_focus, win_blur, log
         ])
         .setup(move |app| {
             let handle = app.handle().clone();
@@ -372,6 +439,9 @@ fn main() {
             let paths: Vec<String> = handle.state::<App>().store.lock().unwrap().config["shelf"].as_array()
                 .map(|a| a.iter().filter_map(|v| v.as_str().map(str::to_string)).collect()).unwrap_or_default();
             add_to_shelf(&handle, &paths);
+
+            // keep a fresh copy of the VPN profile so an update can't lose it
+            let _ = vpn_backup_now(&handle);
 
             let h = handle.clone();
             let watcher = agents::Watcher::new(move |now, prev| {

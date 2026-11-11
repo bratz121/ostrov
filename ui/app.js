@@ -34,6 +34,7 @@ const state = {
   agent: { agent: 'off', status: 'off', since: Date.now() },
   settings: { agent: 'off', city: '', autostart: false, cursorHooks: '' },
   timer: { total: 25 * 60, left: 25 * 60, endAt: null },
+  vpn: { present: false, hasBackup: false },
   announced: new Set(),
 };
 
@@ -525,6 +526,53 @@ function renderWeather() {
     h('div', { class: 'days' }, ...w.days.map((d) => h('span', { title: `Ночью ${degrees(d.min)}` }, weekdayFmt.format(new Date(d.date)), h('b', {}, degrees(d.max))))));
 }
 
+// VPN tab: launches FortiClient. The second factor stays on your phone — the
+// island only opens the app. The island also keeps a copy of the connection
+// profile, so if an update wipes it, one button puts it back.
+function renderVpn() {
+  const v = state.vpn || { present: false, hasBackup: false };
+
+  // left card: open FortiClient
+  const launch = h('button', {
+    class: 'btn primary wide',
+    onclick: async (e) => {
+      e.target.disabled = true;
+      const ok = await api.launchForti();
+      e.target.disabled = false;
+      if (!ok) api.notify('FortiClient не найден', 'Проверьте, что он установлен.');
+    },
+  }, icon('i-shield'), 'Запустить VPN');
+  $('#vpnMain').replaceChildren(
+    h('div', { class: 'vpn-hero' }, icon('i-shield')),
+    h('h1', {}, 'FortiClient'),
+    h('p', { class: 'note' }, 'Открыть клиент VPN. Логин и пароль — в FortiClient, второй фактор подтвердите на телефоне.'),
+    launch);
+
+  // right card: the saved connection profile
+  const info = $('#vpnInfo');
+  if (!v.present && v.hasBackup) {
+    const restore = h('button', {
+      class: 'btn primary wide',
+      onclick: async (e) => {
+        e.target.disabled = true;
+        const ok = await api.vpnRestore();
+        state.vpn = await api.vpnStatus();
+        api.notify(ok ? 'Профиль VPN восстановлен' : 'Не удалось восстановить', ok ? 'Вводить заново не нужно.' : 'Профиль не вернулся.');
+        renderVpn();
+      },
+    }, icon('i-shield'), 'Восстановить профиль');
+    return info.replaceChildren(h('h2', {}, 'Профиль'), h('p', { class: 'note' }, 'Профиль пропал после обновления. Остров сохранил копию — верну без повторного ввода.'), restore);
+  }
+  const line = v.present
+    ? (v.hasBackup ? 'Профиль сохранён. После обновления верну его автоматически.' : 'Профиль найден. Сохраню его копию при следующем запуске.')
+    : 'Профиль пока не настроен. Подключись в FortiClient — остров запомнит его.';
+  const save = v.present ? h('button', {
+    class: 'btn wide', style: 'margin-top:auto;',
+    onclick: async (e) => { e.target.disabled = true; await api.vpnSave(); state.vpn = await api.vpnStatus(); renderVpn(); api.notify('Профиль сохранён', 'После обновления восстановится.'); },
+  }, 'Сохранить сейчас') : null;
+  info.replaceChildren(h('h2', {}, 'Профиль'), h('p', { class: 'note' }, line), save);
+}
+
 // Several towns share a name (Бор is in four countries), so the search may
 // come back with a list to pick from instead of a saved city.
 async function findCity(name, msg, btn, host) {
@@ -1006,7 +1054,7 @@ function loadDemo() {
 }
 
 function renderAll() {
-  renderMusic(); renderArt(); renderVolume(); renderNext(); renderEvents(); renderWeather(); renderMsgs(); renderClips(); renderShelf();
+  renderMusic(); renderArt(); renderVolume(); renderNext(); renderEvents(); renderWeather(); renderVpn(); renderMsgs(); renderClips(); renderShelf();
   renderTasks(); renderTimer(); renderSettings(); renderStatus(); renderSys(); renderPin();
 }
 
@@ -1016,7 +1064,7 @@ setInterval(() => { renderNext(); renderEvents(); renderClips(); }, 30000);
 api.init().then((init) => {
   Object.assign(state, {
     media: init.media, art: init.art, volume: init.volume.level ? init.volume : null, cal: init.cal, weather: init.weather,
-    clips: init.clips, shelf: init.shelf, msgs: init.msgs || [], notifyAccess: init.notifyAccess || state.notifyAccess, displays: init.displays || state.displays, slim: !!init.slim, tasks: init.tasks || [], agent: init.agent, settings: init.settings,
+    clips: init.clips, shelf: init.shelf, msgs: init.msgs || [], notifyAccess: init.notifyAccess || state.notifyAccess, displays: init.displays || state.displays, slim: !!init.slim, tasks: init.tasks || [], agent: init.agent, settings: init.settings, vpn: init.vpn || state.vpn,
   });
   setView('home');
   renderAll();
